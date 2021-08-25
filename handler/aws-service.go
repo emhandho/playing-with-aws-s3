@@ -79,9 +79,6 @@ func (h *AWSHandler) ListBucketItems(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	for _, item := range items {
-		fmt.Print(item)
-	}
 
 	data := map[string]interface{}{
 		"data": items,
