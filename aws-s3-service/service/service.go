@@ -109,6 +109,10 @@ func (s *service) ListBucketItems(bucketName string) ([]awsservice.BucketItems, 
 		s.exitErrorf("Unbale to list items in buckets %q, %v", bucketName, err)
 	}
 
+	if len(response.Contents) == 0 {
+		return items, nil
+	}
+
 	for _, item := range response.Contents {
 		itemt.Key = *item.Key
 		itemt.LastModified = *item.LastModified

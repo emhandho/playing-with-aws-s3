@@ -79,8 +79,20 @@ func (h *AWSHandler) ListBucketItems(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err.Error())
 	}
 
+	var message string
+	var noData bool
+	if len(items) == 0 {
+		message = "There is no items in this bucket."
+		noData = false
+	} else {
+		message = ""
+		noData = true
+	}
+
 	data := map[string]interface{}{
 		"data": items,
+		"message" : message,
+		"noData" : noData,
 	}
 
 	tmpl, err := template.ParseFiles("views/bucketitem.html")
