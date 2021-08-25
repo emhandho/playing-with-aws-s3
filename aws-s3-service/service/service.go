@@ -85,11 +85,10 @@ func (s *service) GetBucketsList() ([]string, error) {
 	}
 
 	var bucketData []string
-	fmt.Println("Buckets Name:")
 	for _, bucket := range result.Buckets {
 		bucketData = append(bucketData, aws.StringValue(bucket.Name))
 	}
-	
+
 	return bucketData, nil
 }
 
@@ -110,24 +109,13 @@ func (s *service) ListBucketItems(bucketName string) ([]awsservice.BucketItems, 
 		s.exitErrorf("Unbale to list items in buckets %q, %v", bucketName, err)
 	}
 
-	if len(response.Contents) > 1 {
-		for _, item := range response.Contents {
-			itemt.Key = *item.Key
-			itemt.LastModified = *item.LastModified
-			itemt.Size = *item.Size
-			itemt.StorageClass = *item.StorageClass
-			
-			items = append(items, itemt)
-		}
-	} else {
-		for _, item := range response.Contents {
-			itemt.Key = *item.Key
-			itemt.LastModified = *item.LastModified
-			itemt.Size = *item.Size
-			itemt.StorageClass = *item.StorageClass
-		
-			items = append(items, itemt)
-		}
+	for _, item := range response.Contents {
+		itemt.Key = *item.Key
+		itemt.LastModified = *item.LastModified
+		itemt.Size = *item.Size
+		itemt.StorageClass = *item.StorageClass
+
+		items = append(items, itemt)
 	}
 
 	return items, nil

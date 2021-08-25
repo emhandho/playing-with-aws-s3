@@ -51,7 +51,6 @@ func (h *AWSHandler) ListTheBuckets(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	fmt.Println(buckets[0])
 
 	data := map[string]interface{}{
 		"buckets": buckets,
