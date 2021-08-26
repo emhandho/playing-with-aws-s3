@@ -106,6 +106,7 @@ func (h *awsHandler) ListBucketItems(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := map[string]interface{}{
+		"bucketName": bucketName,
 		"data": items,
 		"message" : message,
 		"noData" : noData,
@@ -121,9 +122,20 @@ func (h *awsHandler) ListBucketItems(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	
-
 	fmt.Println("Endpoint Hit: bucket items list page")
+}
+
+func (h *awsHandler) UploadFile(w http.ResponseWriter, r *http.Request) {
+	// get the params from input
+	bucketName := r.FormValue("name")
+	fileName := r.FormValue("file")
+
+	if err := h.service.UploadFile(bucketName, fileName); err != nil {
+		fmt.Println(err.Error())
+	}
+
+	fmt.Printf("Successfully Upload file %s to aws bucket %s\n", fileName, bucketName)
+	http.Redirect(w, r, "/bucketslist", http.StatusMovedPermanently)
 }
 
 func (h *awsHandler) DeleteBucket(w http.ResponseWriter, r *http.Request) {

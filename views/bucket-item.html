@@ -18,17 +18,16 @@
         {{if .noData}}
         <table class="table table-striped">
             <thead>
-                <tr>
-                    <th scope="col"></th>
-                    <th scope="col">File Name</th>
-                    <th scope="col">Size</th>
-                    <th scope="col">Last Modified</th>
-                    <th scope="col">Storage Class</th>
+                <tr style="text-align: center;">
+                    <th scope="col" >File Name</th>
+                    <th scope="col" >Size</th>
+                    <th scope="col" >Last Modified</th>
+                    <th scope="col" >Storage Class</th>
                 </tr>
             </thead>
             <tbody>
                 {{range .data}}
-                <td style="text-align: center;">
+                <tr style="text-align: start;">
                     <td>{{.Key}}</td>
                     <td>{{.Size}}</td>
                     <td>{{.LastModified}}</td>
@@ -39,8 +38,19 @@
                 {{end}}
             </tbody>
         </table>
+        <form action="/uploadfile" method="POST" class="text-center">
+            <input name="name" value={{.bucketName}} hidden>
+            <input name="file" type="file" class="form-control-file" id="exampleFormControlFile1">
+            <td><button type="submit" class="btn btn-outline-info">Upload</button></td>
+        </form>
         {{else}}
         <h3 style="text-align: center; margin-top: 100px;">{{.message}}</h3>
+        <h5 style="text-align: center;">then you can upload here:</h5></br>
+        <form action="/uploadfile" method="POST" class="text-center">
+            <input name="name" value={{.bucketName}} hidden>
+            <input name="file" type="file" class="form-control-file" id="exampleFormControlFile1">
+            <td><button type="submit" class="btn btn-outline-secondary">Upload</button></td>
+        </form>
         {{end}}
     </div>
 

@@ -28,6 +28,7 @@ func handleRequests() {
 	myRouter.HandleFunc("/setconfig", page.AWSConfiguration)
 	myRouter.HandleFunc("/createbucketpage", page.CreateBucketPage)
 	myRouter.HandleFunc("/createbucket", awsHandler.CreateBucket)
+	myRouter.HandleFunc("/uploadfile", awsHandler.UploadFile)
 	myRouter.HandleFunc("/configaws", awsHandler.SetAWSConfiguration)
 	myRouter.HandleFunc("/bucketslist", awsHandler.ListTheBuckets)
 	myRouter.HandleFunc("/bucketdetails", awsHandler.ListBucketItems)

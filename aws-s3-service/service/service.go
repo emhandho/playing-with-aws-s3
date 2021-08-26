@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"io/ioutil"
 
 	awsservice "aws-s3-sample/aws-s3-service"
 	"github.com/aws/aws-sdk-go/aws"
@@ -11,7 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/joho/godotenv"
-	// "github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
 type service struct {
@@ -150,6 +151,31 @@ func (s *service) CreateBucket(bucketName string) error {
 
 	fmt.Printf("Bucket %q successfully created\n", bucketName)
 
+	return nil
+}
+
+func (s *service) UploadFile(bucketName, filename string) error {
+	file, err := ioutil.TempFile(os.TempDir(), "temp")
+	if err != nil {
+		panic(err)
+	}
+
+	sess, err := s.createSession()
+	if err != nil {
+		s.exitErrorf("Unable to create session")
+	}
+
+	uploader := s3manager.NewUploader(sess)
+	_, err = uploader.Upload(&s3manager.UploadInput{
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(filename),
+		Body:   file,
+	})
+	if err != nil {
+		s.exitErrorf("Unable to upload %q to %q, %v", filename, bucketName, err)
+	}
+
+	fmt.Printf("Successfully uploaded %q to %q\n", filename, bucketName)
 	return nil
 }
 
