@@ -26,7 +26,7 @@ func getConfig() {
 	// use godot package to load/read the .env file and
 	// return the value of the key
 	// load .env file
-	err := godotenv.Load("save-data/config.env")
+	err := godotenv.Load()
 	if err != nil {
 		fmt.Println(err.Error())
 		log.Fatalf("Error loading .env file")
@@ -123,6 +123,64 @@ func (s *service) ListBucketItems(bucketName string) ([]awsservice.BucketItems, 
 	}
 
 	return items, nil
+}
+
+func (s *service) CreateBucket(bucketName string) error {
+	sess, err := s.createSession()
+	if err != nil {
+		s.exitErrorf("Unable to create session")
+	}
+
+	svc := s3.New(sess)
+	_, err = svc.CreateBucket(&s3.CreateBucketInput{
+		Bucket: aws.String(bucketName),
+	})
+	if err != nil {
+		s.exitErrorf("Unable to create bucket %q, %v", bucketName, err)
+	}
+
+	fmt.Printf("Waiting for bucket %q to be created...\n", bucketName)
+
+	err = svc.WaitUntilBucketExists(&s3.HeadBucketInput{
+		Bucket: aws.String(bucketName),
+	})
+	if err != nil {
+		s.exitErrorf("Error occured while waiting for bucket to be created, %v", bucketName)
+	}
+
+	fmt.Printf("Bucket %q successfully created\n", bucketName)
+
+	return nil
+}
+
+func (s *service) DeleteBucket(bucketName string) error {
+	sess, err := s.createSession()
+	if err != nil {
+		s.exitErrorf("Unable to create session")
+	}
+
+	// Create S3 service client
+	svc := s3.New(sess)
+	_, err = svc.DeleteBucket(&s3.DeleteBucketInput{
+		Bucket: aws.String(bucketName),
+	})
+	if err != nil {
+		s.exitErrorf("Unable to delete bucket %q, %v", bucketName, err)
+	}
+
+	// Wait until bucket is deleted before finishing
+	fmt.Printf("Waiting for bucket %q to be deleted...\n", bucketName)
+
+	err = svc.WaitUntilBucketNotExists(&s3.HeadBucketInput{
+		Bucket: aws.String(bucketName),
+	})
+
+	if err != nil {
+		s.exitErrorf("Error occurred while waiting for bucket to be deleted, %v", bucketName)
+	}
+	
+	fmt.Printf("Bucket %q successfully deleted\n", bucketName)
+	return nil
 }
 
 func (s *service) exitErrorf(msg string, args ...interface{}) {

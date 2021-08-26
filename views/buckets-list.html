@@ -13,34 +13,35 @@
 </head>
 
 <body>
+    {{template "header"}}
     <div class="container">
-        {{if .noData}}
         <table class="table table-striped">
             <thead>
                 <tr>
                     <th scope="col"></th>
-                    <th scope="col">File Name</th>
-                    <th scope="col">Size</th>
-                    <th scope="col">Last Modified</th>
-                    <th scope="col">Storage Class</th>
+                    <th scope="col">Bucket Name</th>
                 </tr>
             </thead>
             <tbody>
-                {{range .data}}
-                <td style="text-align: center;">
-                    <td>{{.Key}}</td>
-                    <td>{{.Size}}</td>
-                    <td>{{.LastModified}}</td>
-                    <td>{{.StorageClass}}</td>
-                    <td><a type="submit" href="#" class="btn btn-outline-warning">Rename</a></td>
-                    <td><a type="submit" href="#" class="btn btn-outline-danger">Delete</a></td>
-                </tr>
+                {{range .buckets}}
+                <form action="/bucketdetails" method="POST">
+                    <td style="text-align: center;">
+                    <td>{{.}}</td>
+                    <input name="name" value={{.}} hidden>
+                    <td><button type="submit" class="btn btn-outline-primary">Details</button></td>
+                </form>
+                <form action="#" method="POST">
+                    <input name="name" value={{.}} hidden>
+                    <td><button type="submit" class="btn btn-outline-warning">Rename</button></td>
+                </form>
+                <form action="/deletebucket" method="POST">
+                    <input name="name" value={{.}} hidden>
+                    <td><button type="submit" class="btn btn-outline-danger">Delete</button></td>
+                </form>
+                    </tr>
                 {{end}}
             </tbody>
         </table>
-        {{else}}
-        <h3 style="text-align: center; margin-top: 100px;">{{.message}}</h3>
-        {{end}}
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"

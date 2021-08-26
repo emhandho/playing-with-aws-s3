@@ -25,9 +25,13 @@ func handleRequests() {
 	awsHandler := handler.NewConfigHandler(awsService)
 
 	myRouter.HandleFunc("/", page.HomePage)
+	myRouter.HandleFunc("/setconfig", page.AWSConfiguration)
+	myRouter.HandleFunc("/createbucketpage", page.CreateBucketPage)
+	myRouter.HandleFunc("/createbucket", awsHandler.CreateBucket)
 	myRouter.HandleFunc("/configaws", awsHandler.SetAWSConfiguration)
 	myRouter.HandleFunc("/bucketslist", awsHandler.ListTheBuckets)
 	myRouter.HandleFunc("/bucketdetails", awsHandler.ListBucketItems)
+	myRouter.HandleFunc("/deletebucket", awsHandler.DeleteBucket)
 	
 	fmt.Println("Server running on port http://localhost:8081")
 	log.Fatal(http.ListenAndServe(":8081", myRouter))

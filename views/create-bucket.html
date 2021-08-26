@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,15 +9,23 @@
 
     <title>AWS S3 Service</title>
 </head>
-
 <body>
-    <div class="container" style="text-align: center;">
-        <H1 style="text-align: center; margin-top: 50px;">Hello, this is HOMEPAGE</H1>
-        <a href="/setconfig" class="btn btn-primary">Config AWS</a>
-        <a href="/bucketslist" class="btn btn-primary">List Buckets</a>
-        <a href="/createbucketpage" class="btn btn-primary">Create Buckets</a>
+    {{template "header"}}
+    <div class="container">
+        <form action="/createbucket" method="POST">
+            <h3 class="text-center">CREATE AWS BUCKET</h3>
+            <div class="form-floating mb-3">
+                <input type="text" name="bucket_name" class="form-control" id="floatingInput"
+                    placeholder="name@example.com">
+                <label for="floatingInput">BUKCET NAME</label>
+            </div>
+            <div class="container">
+                <div class="col-md-12 text-center">
+                    <button type="submit" class="btn btn-success">Connect</button>
+                </div>
+            </div>
+        </form>
     </div>
-
 
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"
         integrity="sha384-eMNCOe7tC1doHpGoWe/6oMVemdAVTMs2xqW4mwXrXsW0L84Iytr2wi5v2QjrP/xp"
@@ -27,5 +34,4 @@
         integrity="sha384-cn7l7gDp0eyniUwwAZgrzD06kc/tftFf19TOAs2zVinnD/C7E91j9yyk5//jjpt/"
         crossorigin="anonymous"></script>
 </body>
-
 </html>

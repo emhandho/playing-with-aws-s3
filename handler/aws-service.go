@@ -2,20 +2,21 @@ package handler
 
 import (
 	awss3service "aws-s3-sample/aws-s3-service"
+	"errors"
 	"fmt"
 	"html/template"
 	"net/http"
 )
 
-type AWSHandler struct {
+type awsHandler struct {
 	service awss3service.Service
 }
 
-func NewConfigHandler(service awss3service.Service) *AWSHandler {
-	return &AWSHandler{service}
+func NewConfigHandler(service awss3service.Service) *awsHandler {
+	return &awsHandler{service}
 }
 
-func (h *AWSHandler) SetAWSConfiguration(w http.ResponseWriter, r *http.Request) {
+func (h *awsHandler) SetAWSConfiguration(w http.ResponseWriter, r *http.Request) {
 	// define the struct to mapping the input
 	var input awss3service.InputConfigAws
 
@@ -42,10 +43,25 @@ func (h *AWSHandler) SetAWSConfiguration(w http.ResponseWriter, r *http.Request)
 
 	fmt.Println("successfully set the config!")
 
+	http.Redirect(w, r, "/", http.StatusMovedPermanently)
+}
+
+func (h *awsHandler) CreateBucket(w http.ResponseWriter, r *http.Request) {
+	//get the bucket name from input
+	inputName := r.FormValue("bucket_name")
+
+	// input the name to the create bucket service
+	err := h.service.CreateBucket(inputName)
+	if err != nil {
+		fmt.Println(errors.New("cannot create the bucket"))
+	}
+
+	fmt.Println("success create the bucket")
+
 	http.Redirect(w, r, "/bucketslist", http.StatusMovedPermanently)
 }
 
-func (h *AWSHandler) ListTheBuckets(w http.ResponseWriter, r *http.Request) {
+func (h *awsHandler) ListTheBuckets(w http.ResponseWriter, r *http.Request) {
 	// get the buckets list from service
 	buckets, err := h.service.GetBucketsList()
 	if err != nil {
@@ -56,7 +72,7 @@ func (h *AWSHandler) ListTheBuckets(w http.ResponseWriter, r *http.Request) {
 		"buckets": buckets,
 	}
 
-	tmpl, err := template.ParseFiles("views/bucketslist.html")
+	tmpl, err := template.ParseFiles("views/buckets-list.html", "views/header.html")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -69,7 +85,7 @@ func (h *AWSHandler) ListTheBuckets(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint Hit: buckets list page")
 }
 
-func (h *AWSHandler) ListBucketItems(w http.ResponseWriter, r *http.Request) {
+func (h *awsHandler) ListBucketItems(w http.ResponseWriter, r *http.Request) {
 	// get the params for service
 	bucketName := r.FormValue("name")
 
@@ -95,7 +111,7 @@ func (h *AWSHandler) ListBucketItems(w http.ResponseWriter, r *http.Request) {
 		"noData" : noData,
 	}
 
-	tmpl, err := template.ParseFiles("views/bucketitem.html")
+	tmpl, err := template.ParseFiles("views/bucket-item.html", "views/header.html")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -105,5 +121,22 @@ func (h *AWSHandler) ListBucketItems(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
+	
+
 	fmt.Println("Endpoint Hit: bucket items list page")
+}
+
+func (h *awsHandler) DeleteBucket(w http.ResponseWriter, r *http.Request) {
+	// get the bucket name
+	bucketName := r.FormValue("name")
+
+	// input the name to the deelet bucket service
+	err := h.service.DeleteBucket(bucketName)
+	if err != nil {
+		fmt.Println(errors.New("cannot create the bucket"))
+	}
+
+	fmt.Println("success create the bucket")
+
+	http.Redirect(w, r, "/bucketslist", http.StatusMovedPermanently)
 }
