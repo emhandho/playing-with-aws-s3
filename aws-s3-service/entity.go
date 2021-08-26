@@ -10,6 +10,7 @@ type ConfigSessionAWS struct {
 }
 
 type BucketItems struct {
+	BucketName   string
 	Key          string
 	LastModified time.Time
 	Size         int64

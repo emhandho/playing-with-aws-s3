@@ -119,6 +119,7 @@ func (s *service) ListBucketItems(bucketName string) ([]awsservice.BucketItems, 
 		itemt.LastModified = *item.LastModified
 		itemt.Size = *item.Size
 		itemt.StorageClass = *item.StorageClass
+		itemt.BucketName = bucketName
 
 		items = append(items, itemt)
 	}
@@ -206,6 +207,36 @@ func (s *service) DeleteBucket(bucketName string) error {
 	}
 	
 	fmt.Printf("Bucket %q successfully deleted\n", bucketName)
+	return nil
+}
+
+func (s *service) DeleteItemInBucket(bucketName, itemName string) error {
+	sess, err := s.createSession()
+	if err != nil {
+		s.exitErrorf("Unable to create session")
+	}
+	
+    // Create S3 service client
+    svc := s3.New(sess)
+
+    // Delete the item
+    _, err = svc.DeleteObject(&s3.DeleteObjectInput{
+		Bucket: aws.String(bucketName),
+		Key: aws.String(itemName),
+	})
+    if err != nil {
+        s.exitErrorf("Unable to delete object %q from bucket %q, %v", itemName, bucketName, err)
+    }
+
+    err = svc.WaitUntilObjectNotExists(&s3.HeadObjectInput{
+        Bucket: aws.String(bucketName),
+        Key:    aws.String(itemName),
+    })
+    if err != nil {
+        s.exitErrorf("Error occurred while waiting for object %q to be deleted, %v", itemName, err)
+    }
+
+    fmt.Printf("Object %q successfully deleted\n", itemName)
 	return nil
 }
 

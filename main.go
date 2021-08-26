@@ -33,6 +33,7 @@ func handleRequests() {
 	myRouter.HandleFunc("/bucketslist", awsHandler.ListTheBuckets)
 	myRouter.HandleFunc("/bucketdetails", awsHandler.ListBucketItems)
 	myRouter.HandleFunc("/deletebucket", awsHandler.DeleteBucket)
+	myRouter.HandleFunc("/deleteitem", awsHandler.DeleteItem)
 	
 	fmt.Println("Server running on port http://localhost:8081")
 	log.Fatal(http.ListenAndServe(":8081", myRouter))

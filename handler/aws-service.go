@@ -145,10 +145,24 @@ func (h *awsHandler) DeleteBucket(w http.ResponseWriter, r *http.Request) {
 	// input the name to the deelet bucket service
 	err := h.service.DeleteBucket(bucketName)
 	if err != nil {
-		fmt.Println(errors.New("cannot create the bucket"))
+		fmt.Println(errors.New("cannot delete bucket"))
 	}
 
 	fmt.Println("success create the bucket")
+
+	http.Redirect(w, r, "/bucketslist", http.StatusMovedPermanently)
+}
+
+func (h *awsHandler) DeleteItem(w http.ResponseWriter, r *http.Request) {
+	// get the bucket item name
+	itemName := r.FormValue("item")
+	bucketName := r.FormValue("name")
+
+	if err := h.service.DeleteItemInBucket(bucketName, itemName); err != nil {
+		fmt.Println(errors.New("cannot delete item"))
+	}
+
+	fmt.Println("success delete the item")
 
 	http.Redirect(w, r, "/bucketslist", http.StatusMovedPermanently)
 }

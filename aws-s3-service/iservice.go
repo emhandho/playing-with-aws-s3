@@ -7,4 +7,5 @@ type Service interface {
 	UploadFile(bucketName, filename string) error
 	CreateBucket(bucketName string) error
 	DeleteBucket(bucketName string) error
+	DeleteItemInBucket(bucketName, itemName string) error
 }

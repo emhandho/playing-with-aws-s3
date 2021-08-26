@@ -18,11 +18,11 @@
         {{if .noData}}
         <table class="table table-striped">
             <thead>
-                <tr style="text-align: center;">
-                    <th scope="col" >File Name</th>
-                    <th scope="col" >Size</th>
-                    <th scope="col" >Last Modified</th>
-                    <th scope="col" >Storage Class</th>
+                <tr>
+                    <th scope="col">File Name</th>
+                    <th scope="col">Size</th>
+                    <th scope="col">Last Modified</th>
+                    <th scope="col">Storage Class</th>
                 </tr>
             </thead>
             <tbody>
@@ -33,7 +33,11 @@
                     <td>{{.LastModified}}</td>
                     <td>{{.StorageClass}}</td>
                     <td><a type="submit" href="#" class="btn btn-outline-warning">Rename</a></td>
-                    <td><a type="submit" href="#" class="btn btn-outline-danger">Delete</a></td>
+                    <form action="/deleteitem">
+                        <input type="text" name="item" value={{.Key}} hidden>
+                        <input type="text" name="name" value={{.BucketName}} hidden>
+                        <td><button type="submit" class="btn btn-outline-danger">Delete</button></td>
+                    </form>
                 </tr>
                 {{end}}
             </tbody>
