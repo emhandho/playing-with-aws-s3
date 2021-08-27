@@ -135,7 +135,7 @@ func (h *awsHandler) UploadFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Printf("Successfully Upload file %s to aws bucket %s\n", fileName, bucketName)
-	http.Redirect(w, r, "/bucketslist", http.StatusMovedPermanently)
+	http.Redirect(w, r, "/bucketdetails?name="+bucketName, http.StatusMovedPermanently)
 }
 
 func (h *awsHandler) DeleteBucket(w http.ResponseWriter, r *http.Request) {
@@ -164,5 +164,5 @@ func (h *awsHandler) DeleteItem(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("success delete the item")
 
-	http.Redirect(w, r, "/bucketslist", http.StatusMovedPermanently)
+	http.Redirect(w, r, "/bucketdetails?name="+bucketName, http.StatusMovedPermanently)
 }
