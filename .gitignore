@@ -2,3 +2,5 @@ files-test/
 .env
 assets/home/
 .gitignore
+aws-s3-sample.exe
+go.mod
