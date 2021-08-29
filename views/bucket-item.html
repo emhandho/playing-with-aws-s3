@@ -41,7 +41,7 @@
                 {{end}}
             </tbody>
         </table>
-        <form action="/uploadfile" method="POST" class="text-center">
+        <form action="/uploadfile" method="POST" class="text-center" enctype="multipart/form-data">
             <input name="name" value={{.bucketName}} hidden>
             <input name="file" type="file" class="form-control-file" id="exampleFormControlFile1">
             <td><button type="submit" class="btn btn-outline-info">Upload</button></td>

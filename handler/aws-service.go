@@ -107,9 +107,9 @@ func (h *awsHandler) ListBucketItems(w http.ResponseWriter, r *http.Request) {
 
 	data := map[string]interface{}{
 		"bucketName": bucketName,
-		"data": items,
-		"message" : message,
-		"noData" : noData,
+		"data":       items,
+		"message":    message,
+		"noData":     noData,
 	}
 
 	tmpl, err := template.ParseFiles("views/bucket-item.html", "views/header.html")
@@ -126,12 +126,35 @@ func (h *awsHandler) ListBucketItems(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *awsHandler) UploadFile(w http.ResponseWriter, r *http.Request) {
-	// get the params from input
-	bucketName := r.FormValue("name")
-	fileName := r.FormValue("file")
+	if r.Method != "POST" {
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
 
-	if err := h.service.UploadFile(bucketName, fileName); err != nil {
-		fmt.Println(err.Error())
+	content := r.Header.Get("Content-Type")
+	fmt.Println(content)
+
+	// get the params from input
+	if err := r.ParseMultipartForm(10 << 20); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("here")
+		fmt.Println(err)
+		return
+	}
+
+	bucketName := r.FormValue("name")
+	uploadedFile, handler, err := r.FormFile("file")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer uploadedFile.Close()
+
+	fileName := handler.Filename
+
+	if err := h.service.UploadFile(bucketName, fileName, uploadedFile); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	fmt.Printf("Successfully Upload file %s to aws bucket %s\n", fileName, bucketName)

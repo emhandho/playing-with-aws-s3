@@ -3,4 +3,3 @@ files-test/
 assets/home/
 .gitignore
 aws-s3-sample.exe
-go.mod

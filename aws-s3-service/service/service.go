@@ -1,18 +1,20 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 	"log"
+	"mime/multipart"
 	"os"
-	"io/ioutil"
 
 	awsservice "aws-s3-sample/aws-s3-service"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/joho/godotenv"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/joho/godotenv"
 )
 
 type service struct {
@@ -76,13 +78,13 @@ func (s *service) GetBucketsList() ([]string, error) {
 	// Create s3-service-client
 	sess, err := s.createSession()
 	if err != nil {
-		s.exitErrorf("Unable to create session")
+		return nil, errors.New("unable to create session")
 	}
 	svc := s3.New(sess)
 
 	result, err := svc.ListBuckets(nil)
 	if err != nil {
-		s.exitErrorf("Unable to list buckets, %v", err)
+		return nil, fmt.Errorf("unable to list buckets, %v", err)
 	}
 
 	var bucketData []string
@@ -100,14 +102,14 @@ func (s *service) ListBucketItems(bucketName string) ([]awsservice.BucketItems, 
 
 	sess, err := s.createSession()
 	if err != nil {
-		s.exitErrorf("Unable to create session")
+		return items, errors.New("unable to create session")
 	}
 
 	svc := s3.New(sess)
 
 	response, err := svc.ListObjectsV2(&s3.ListObjectsV2Input{Bucket: aws.String(bucketName)})
 	if err != nil {
-		s.exitErrorf("Unbale to list items in buckets %q, %v", bucketName, err)
+		return items, fmt.Errorf("unbale to list items in buckets %q, %v", bucketName, err)
 	}
 
 	if len(response.Contents) == 0 {
@@ -130,7 +132,7 @@ func (s *service) ListBucketItems(bucketName string) ([]awsservice.BucketItems, 
 func (s *service) CreateBucket(bucketName string) error {
 	sess, err := s.createSession()
 	if err != nil {
-		s.exitErrorf("Unable to create session")
+		return errors.New("unable to create session")
 	}
 
 	svc := s3.New(sess)
@@ -138,7 +140,7 @@ func (s *service) CreateBucket(bucketName string) error {
 		Bucket: aws.String(bucketName),
 	})
 	if err != nil {
-		s.exitErrorf("Unable to create bucket %q, %v", bucketName, err)
+		return fmt.Errorf("unable to create bucket %q, %v", bucketName, err)
 	}
 
 	fmt.Printf("Waiting for bucket %q to be created...\n", bucketName)
@@ -147,7 +149,7 @@ func (s *service) CreateBucket(bucketName string) error {
 		Bucket: aws.String(bucketName),
 	})
 	if err != nil {
-		s.exitErrorf("Error occured while waiting for bucket to be created, %v", bucketName)
+		return fmt.Errorf("error occured while waiting for bucket to be created, %v", bucketName)
 	}
 
 	fmt.Printf("Bucket %q successfully created\n", bucketName)
@@ -155,35 +157,30 @@ func (s *service) CreateBucket(bucketName string) error {
 	return nil
 }
 
-func (s *service) UploadFile(bucketName, filename string) error {
-	file, err := ioutil.TempFile(os.TempDir(), "temp")
-	if err != nil {
-		panic(err)
-	}
-
+func (s *service) UploadFile(bucketName string, fileName string, fileLocation multipart.File) error {
 	sess, err := s.createSession()
 	if err != nil {
-		s.exitErrorf("Unable to create session")
+		return errors.New("unable to create session")
 	}
 
 	uploader := s3manager.NewUploader(sess)
 	_, err = uploader.Upload(&s3manager.UploadInput{
 		Bucket: aws.String(bucketName),
-		Key:    aws.String(filename),
-		Body:   file,
+		Key:    aws.String(fileName),
+		Body:   fileLocation,
 	})
 	if err != nil {
-		s.exitErrorf("Unable to upload %q to %q, %v", filename, bucketName, err)
+		return fmt.Errorf("unable to upload %q to %q, %v", fileName, bucketName, err)
 	}
 
-	fmt.Printf("Successfully uploaded %q to %q\n", filename, bucketName)
+	fmt.Printf("Successfully uploaded %q to %q\n", fileName, bucketName)
 	return nil
 }
 
 func (s *service) DeleteBucket(bucketName string) error {
 	sess, err := s.createSession()
 	if err != nil {
-		s.exitErrorf("Unable to create session")
+		return errors.New("unable to create session")
 	}
 
 	// Create S3 service client
@@ -192,7 +189,7 @@ func (s *service) DeleteBucket(bucketName string) error {
 		Bucket: aws.String(bucketName),
 	})
 	if err != nil {
-		s.exitErrorf("Unable to delete bucket %q, %v", bucketName, err)
+		return fmt.Errorf("unable to delete bucket %q, %v", bucketName, err)
 	}
 
 	// Wait until bucket is deleted before finishing
@@ -203,9 +200,9 @@ func (s *service) DeleteBucket(bucketName string) error {
 	})
 
 	if err != nil {
-		s.exitErrorf("Error occurred while waiting for bucket to be deleted, %v", bucketName)
+		return fmt.Errorf("error occurred while waiting for object %q to be deleted, %v", bucketName, err)
 	}
-	
+
 	fmt.Printf("Bucket %q successfully deleted\n", bucketName)
 	return nil
 }
@@ -213,34 +210,29 @@ func (s *service) DeleteBucket(bucketName string) error {
 func (s *service) DeleteItemInBucket(bucketName, itemName string) error {
 	sess, err := s.createSession()
 	if err != nil {
-		s.exitErrorf("Unable to create session")
+		return errors.New("unable to create session")
 	}
-	
-    // Create S3 service client
-    svc := s3.New(sess)
 
-    // Delete the item
-    _, err = svc.DeleteObject(&s3.DeleteObjectInput{
+	// Create S3 service client
+	svc := s3.New(sess)
+
+	// Delete the item
+	_, err = svc.DeleteObject(&s3.DeleteObjectInput{
 		Bucket: aws.String(bucketName),
-		Key: aws.String(itemName),
+		Key:    aws.String(itemName),
 	})
-    if err != nil {
-        s.exitErrorf("Unable to delete object %q from bucket %q, %v", itemName, bucketName, err)
-    }
+	if err != nil {
+		return fmt.Errorf("unable to delete bucket %q, %v", itemName, err)
+	}
 
-    err = svc.WaitUntilObjectNotExists(&s3.HeadObjectInput{
-        Bucket: aws.String(bucketName),
-        Key:    aws.String(itemName),
-    })
-    if err != nil {
-        s.exitErrorf("Error occurred while waiting for object %q to be deleted, %v", itemName, err)
-    }
+	err = svc.WaitUntilObjectNotExists(&s3.HeadObjectInput{
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(itemName),
+	})
+	if err != nil {
+		return fmt.Errorf("error occurred while waiting for object %q to be deleted, %v", itemName, err)
+	}
 
-    fmt.Printf("Object %q successfully deleted\n", itemName)
+	fmt.Printf("Object %q successfully deleted\n", itemName)
 	return nil
-}
-
-func (s *service) exitErrorf(msg string, args ...interface{}) {
-	fmt.Fprintf(os.Stderr, msg+"\n", args...)
-	os.Exit(1)
 }
