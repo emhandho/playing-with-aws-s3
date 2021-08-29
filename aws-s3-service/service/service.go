@@ -185,6 +185,56 @@ func (s *service) DeleteBucket(bucketName string) error {
 
 	// Create S3 service client
 	svc := s3.New(sess)
+
+	response, err := svc.ListObjectsV2(&s3.ListObjectsV2Input{Bucket: aws.String(bucketName)})
+	if err != nil {
+		return fmt.Errorf("there is no items in this bucket %q, %v", bucketName, err)
+	}
+
+	if len((*response).Contents) != 0 {
+		// make var that will be a place to store the objects
+		objectsToDelete := make([]*s3.ObjectIdentifier, 0 , 1000)
+		for _, object := range (*response).Contents{
+			obj := s3.ObjectIdentifier {
+				Key: object.Key,
+			}
+			objectsToDelete = append(objectsToDelete, &obj)
+		}
+
+		//Creating JSON payload for bulk delete
+		deleteArray := s3.Delete{Objects: objectsToDelete}
+		deleteParams := &s3.DeleteObjectsInput{
+			Bucket: aws.String(bucketName),
+			Delete: &deleteArray,
+		}
+
+		//Running the bulk delete job
+		_, err := svc.DeleteObjects(deleteParams)
+		if err != nil {
+			return err
+		}
+
+		//Delete the bucket after empty
+		_, err = svc.DeleteBucket(&s3.DeleteBucketInput{
+			Bucket: aws.String(bucketName),
+		})
+		if err != nil {
+			return fmt.Errorf("unable to delete bucket %q, %v", bucketName, err)
+		}
+	
+		// Wait until bucket is deleted before finishing
+		fmt.Printf("Waiting for bucket %q to be deleted...\n", bucketName)
+		err = svc.WaitUntilBucketNotExists(&s3.HeadBucketInput{
+			Bucket: aws.String(bucketName),
+		})
+		if err != nil {
+			return fmt.Errorf("error occurred while waiting for object %q to be deleted, %v", bucketName, err)
+		}
+	
+		fmt.Printf("Bucket %q successfully deleted\n", bucketName)
+		return nil
+	}
+
 	_, err = svc.DeleteBucket(&s3.DeleteBucketInput{
 		Bucket: aws.String(bucketName),
 	})
