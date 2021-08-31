@@ -7,8 +7,10 @@ import (
 	"net/http"
 	"os"
 
-	repository "aws-s3-sample/aws-s3-service/repository"
-	service "aws-s3-sample/aws-s3-service/service"
+	awsrepo "aws-s3-sample/aws-s3-service/repository"
+	awsservice "aws-s3-sample/aws-s3-service/service"
+	uservice "aws-s3-sample/user/service"
+	urepo "aws-s3-sample/user/repository"
 	handler "aws-s3-sample/handler"
 	page "aws-s3-sample/handler/page-handler"
 
@@ -41,12 +43,12 @@ func handleRequests() {
 	}
 
 	
-	awsRepo := repository.NewRepository(db)
-	awsService := service.NewService(awsRepo)
-	awsHandler := handler.NewConfigHandler(awsService)
+	awsRepo := awsrepo.NewRepository(db)
+	awsService := awsservice.NewService(awsRepo)
+	awsHandler := handler.NewAWSHandler(awsService)
 	
-	userRepo := repository.NewRepository(db)
-	userService := service.NewService(userRepo)
+	userRepo := urepo.NewRepository(db)
+	userService := uservice.NewService(userRepo)
 	userHandler := handler.NewUserHandler(userService)
 	
 	myRouter := mux.NewRouter().StrictSlash(true)

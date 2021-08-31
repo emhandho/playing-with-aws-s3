@@ -12,7 +12,7 @@ type awsHandler struct {
 	service awss3service.Service
 }
 
-func NewConfigHandler(service awss3service.Service) *awsHandler {
+func NewAWSHandler(service awss3service.Service) *awsHandler {
 	return &awsHandler{service}
 }
 
