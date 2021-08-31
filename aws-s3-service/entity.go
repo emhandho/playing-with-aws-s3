@@ -7,6 +7,8 @@ type ConfigSessionAWS struct {
 	AwsRegion          string
 	AwsAccessKeyID     string
 	AwsSecretAccessKey string
+	CreatedAt          time.Time
+	UpdatedAt          time.Time
 }
 
 type BucketItems struct {
@@ -15,4 +17,6 @@ type BucketItems struct {
 	LastModified time.Time
 	Size         int64
 	StorageClass string
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }

@@ -36,7 +36,7 @@ func (h *awsHandler) SetAWSConfiguration(w http.ResponseWriter, r *http.Request)
 	input.AwsAccessKeyID = awsAccessKeyID
 	input.AwsSecretAccessKey = awsSecretAccessKey
 
-	err := h.service.SaveConfig(input)
+	_, err := h.service.SaveConfig(input)
 	if err != nil {
 		fmt.Println(err)
 	}

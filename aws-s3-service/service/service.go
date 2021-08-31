@@ -3,7 +3,6 @@ package service
 import (
 	"errors"
 	"fmt"
-	"log"
 	"mime/multipart"
 	"os"
 
@@ -14,7 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/joho/godotenv"
+	
 )
 
 type service struct {
@@ -25,18 +24,7 @@ func NewService(repo awsservice.Repository) *service {
 	return &service{repo}
 }
 
-func getConfig() {
-	// use godot package to load/read the .env file and
-	// return the value of the key
-	// load .env file
-	err := godotenv.Load()
-	if err != nil {
-		fmt.Println(err.Error())
-		log.Fatalf("Error loading .env file")
-	}
-}
-
-func (s *service) SaveConfig(input awsservice.InputConfigAws) error {
+func (s *service) SaveConfig(input awsservice.InputConfigAws) (awsservice.ConfigSessionAWS ,error) {
 	config := awsservice.ConfigSessionAWS{}
 	config.AwsURL = input.AwsURL
 	config.AwsRegion = input.AwsRegion
@@ -45,10 +33,10 @@ func (s *service) SaveConfig(input awsservice.InputConfigAws) error {
 
 	err := s.repository.Save(config)
 	if err != nil {
-		return err
+		return config, err
 	}
 
-	return nil
+	return config, nil
 }
 
 func (s *service) createSession() (*session.Session, error) {
@@ -72,9 +60,6 @@ func (s *service) createSession() (*session.Session, error) {
 }
 
 func (s *service) GetBucketsList() ([]string, error) {
-	// get the config first
-	getConfig()
-
 	// Create s3-service-client
 	sess, err := s.createSession()
 	if err != nil {

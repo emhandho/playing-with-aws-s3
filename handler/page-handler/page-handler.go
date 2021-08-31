@@ -51,3 +51,18 @@ func CreateBucketPage(w http.ResponseWriter, r *http.Request) {
 
     fmt.Println("Endpoint Hit: Create Bucket Page")
 }
+
+func LoginUser(w http.ResponseWriter, r *http.Request) {
+	var filepath = path.Join("views", "create-bucket.html")
+	var tmpl, err = template.ParseFiles(filepath, "views/header.html")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	err = tmpl.Execute(w, nil)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+    fmt.Println("Endpoint Hit: Create Bucket Page")
+}

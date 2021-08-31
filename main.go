@@ -1,26 +1,48 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	repository "aws-s3-sample/aws-s3-service/repository"
 	service "aws-s3-sample/aws-s3-service/service"
-	page "aws-s3-sample/handler/page-handler"
 	handler "aws-s3-sample/handler"
+	page "aws-s3-sample/handler/page-handler"
 
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 )
+
+// func init() is the first func that will be executed when the program start
+func init() {
+	// use godot package to load/read the .env file and
+	// return the value of the key
+	// load .env file
+	err := godotenv.Load()
+	if err != nil {
+		fmt.Println(err.Error())
+		log.Fatalf("Error loading .env file")
+	}
+}
 
 func main() {
 	handleRequests()
 }
 
 func handleRequests() {
+	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+			os.Getenv("username"), os.Getenv("password"), os.Getenv("address"), os.Getenv("dbname"))
+	db, err := sql.Open(os.Getenv("dbdriver"), dsn)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
 	myRouter := mux.NewRouter().StrictSlash(true)
 
-	awsRepo := repository.NewRepository()
+	awsRepo := repository.NewRepository(db)
 	awsService := service.NewService(awsRepo)
 	awsHandler := handler.NewConfigHandler(awsService)
 
