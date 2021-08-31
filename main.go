@@ -40,13 +40,21 @@ func handleRequests() {
 		log.Fatal(err.Error())
 	}
 
-	myRouter := mux.NewRouter().StrictSlash(true)
-
+	
 	awsRepo := repository.NewRepository(db)
 	awsService := service.NewService(awsRepo)
 	awsHandler := handler.NewConfigHandler(awsService)
-
+	
+	userRepo := repository.NewRepository(db)
+	userService := service.NewService(userRepo)
+	userHandler := handler.NewUserHandler(userService)
+	
+	myRouter := mux.NewRouter().StrictSlash(true)
+	
 	myRouter.HandleFunc("/", page.HomePage)
+	myRouter.HandleFunc("/login", page.LoginUser)
+	myRouter.HandleFunc("/register", page.RegisterUser)
+	myRouter.HandleFunc("/registeruser", userHandler.RegisterUser)
 	myRouter.HandleFunc("/setconfig", page.AWSConfiguration)
 	myRouter.HandleFunc("/createbucketpage", page.CreateBucketPage)
 	myRouter.HandleFunc("/createbucket", awsHandler.CreateBucket)

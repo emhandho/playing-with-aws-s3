@@ -53,8 +53,8 @@ func CreateBucketPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func LoginUser(w http.ResponseWriter, r *http.Request) {
-	var filepath = path.Join("views", "create-bucket.html")
-	var tmpl, err = template.ParseFiles(filepath, "views/header.html")
+	var filepath = path.Join("views", "lgoin.html")
+	var tmpl, err = template.ParseFiles(filepath)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -64,5 +64,20 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-    fmt.Println("Endpoint Hit: Create Bucket Page")
+    fmt.Println("Endpoint Hit: Login Page")
+}
+
+func RegisterUser(w http.ResponseWriter, r *http.Request) {
+	var filepath = path.Join("views", "register.html")
+	var tmpl, err = template.ParseFiles(filepath)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	err = tmpl.Execute(w, nil)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+    fmt.Println("Endpoint Hit: Register Page")
 }
